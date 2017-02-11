@@ -32,9 +32,8 @@ exports.compileCPP = function ( envData ,  code , fn ) {
                     else
                     console.log('INFO: '.green + filename +'.cpp created'); 
                 }
-            });
-
-            //compiling and exrcuiting source code
+                else{
+                    //compiling and exrcuiting source code
             //compile c code 
 
             //commmand = 'gcc ' + path + filename +'.cpp -o '+ path + filename+'.out' ;
@@ -81,8 +80,10 @@ exports.compileCPP = function ( envData ,  code , fn ) {
 
                 }           
             });
-           }                                        
-} //end of compileCPP
+                }
+            });        
+}                                        
+
 
 exports.compileCPPWithInput = function ( envData , code , input ,  fn ) { 
     var filename = cuid.slug();
