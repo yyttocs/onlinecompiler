@@ -3,7 +3,7 @@ var fs = require('fs');
 var cuid = require('cuid');
 var colors = require('colors');
 var cppModule = require('./ccompiler.js');
-var javaModule = require('./javacompiler.js');
+var javaModule = require('./javacompiler1.js');
 
 
 exports.stats = false;

@@ -8,14 +8,16 @@ exports.stats = false ;
 
 exports.compileJava = function (envData , code , fn ){
     //creating source file
-    var command = sudo docker run -t -i nimmis/java-centos /bin/bash
+    var command = 'sudo docker run -t -i nimmis/java-centos /bin/bash'
     exec(command, function(error, stdout, stderr){
         if(error){
             console.log('create the containner failed')
             var out = {error : stderr}
+            fn(out)
         }
         else{
-             var dirname = cuid.slug();
+            console.log('containner created')
+            var dirname = cuid.slug();
     path = './temp/'+dirname;
 
     fs.mkdir(path , 0o777 , function(err){   
@@ -82,7 +84,7 @@ exports.compileJava = function (envData , code , fn ){
         }
     });
         }
-        
+
     })   
 }
 
