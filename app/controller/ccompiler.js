@@ -2,16 +2,26 @@ var exec  = require('child_process').exec;
 var fs = require('fs');
 var cuid = require('cuid');
 var colors = require('colors');
+var shell = require('shelljs')
+var async = require('async')
 
+exports.stats = false ;
 
+var TEST_FOLDER = '/home/ec2-user/onlinecompiler/temp/';
+var CbuildCompileCmd = function (filename) {
+    return "sudo docker run -w=/usr/compiler -t -v=/home/ec2-user/onlinecompiler/temp/:/usr/compiler/:rw " + "c8bded43e9e6" + " " + 'gcc ' + filename +'.cpp -o '+ filename +'.out'  ;
+};
+var CbuildRunCmd = function (filename) {
+    return "sudo docker run -w=/usr/compiler -t -v=/home/ec2-user/onlinecompiler/temp/:/usr/compiler/:rw " + "c8bded43e9e6" + " timeout 5s " + './' + filename + '.out';
+};
 exports.stats = false ;
 
 
 exports.compileCPP = function ( envData ,  code , fn ) { 
             //creating source file
             var filename = cuid.slug();
-            path = './temp/';
-                         
+            path = TEST_FOLDER
+                 
 
             //create temp0 
             fs.writeFile( path  +  filename +'.cpp' , code  , function(err ){           
@@ -25,65 +35,10 @@ exports.compileCPP = function ( envData ,  code , fn ) {
             });
 
             //compiling and exrcuiting source code
-           if(envData.OS === 'windows' || envData.cmd === 'g++')
-           {
-
             //compile c code 
-            commmand = 'g++ ' + path + filename +'.cpp -o '+path + filename +'.exe' ;
-            exec(commmand , function ( error , stdout , stderr ){  
-                if(error)
-                {
-                    if(exports.stats)
-                    {
-                        console.log('INFO: '.green + filename + '.cpp contained an error while compiling');
-                    }
-                    var out = { error : stderr };
-                    fn(out);
-                }
-                else
-                {
-                    var tempcommand = "cd temp & "+ filename ;
-                    exec( tempcommand , function ( error , stdout , stderr ){
-                        if(error)
-                        {
-                        
-                        if(error.toString().indexOf('Error: stdout maxBuffer exceeded.') != -1)
-                            {
-                                var out = { error : 'Error: stdout maxBuffer exceeded. You might have initialized an infinite loop.' };
-                                fn(out);                                
-                            }
-                        else
-                            {
-                                if(exports.stats)
-                                {
-                                    console.log('INFO: '.green + filename + '.cpp contained an error while executing');
-                                }
 
-                                var out = { error : stderr };
-                                fn(out);                                
-                            }                                                   
-                        }
-                        else
-                        {
-                            if(exports.stats)
-                            {
-                                console.log('INFO: '.green + filename + '.cpp successfully compiled and executed !');
-                            }
-                            var out = { output : stdout};
-                            fn(out);
-                        }
-                    });
-                }           
-
-            });
-
-
-           }  
-           else 
-           {
-            //compile c code 
-            commmand = 'gcc ' + path + filename +'.cpp -o '+ path + filename+'.out' ;
-            exec(commmand , function ( error , stdout , stderr ){  
+            //commmand = 'gcc ' + path + filename +'.cpp -o '+ path + filename+'.out' ;
+            shell.exec(CbuildCompileCmd , function ( error , stdout , stderr ){  
                 if(error)
                 {
                     if(exports.stats)
@@ -95,7 +50,7 @@ exports.compileCPP = function ( envData ,  code , fn ) {
                 }
                 else
                 {
-                    exec( path + filename + '.out', function ( error , stdout , stderr ){
+                    shell.exec(CbuildRunCmd(filename), function ( error , stdout , stderr ){
                         if(error)
                         {
                         if(error.toString().indexOf('Error: stdout maxBuffer exceeded.') != -1)

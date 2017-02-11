@@ -20,7 +20,7 @@ var TEST_FOLDER = '/home/ec2-user/onlinecompiler/temp/';
  * codeExtension - extension of lang 
  */
 var JavabuildCompileCmd = function (dirname) {
-    return "sudo docker run -n=false -w=/usr/compiler -t -v=/home/ec2-user/onlinecompiler/temp/" + dirname +"/" + ":/usr/compiler/:rw " + "94eacf36e27a" + " " + 'javac Main.java';
+    return "sudo docker run -w=/usr/compiler -t -v=/home/ec2-user/onlinecompiler/temp/" + dirname +"/" + ":/usr/compiler/:rw " + "94eacf36e27a" + " " + 'javac Main.java';
 };
 
 /*
@@ -30,7 +30,7 @@ var JavabuildCompileCmd = function (dirname) {
  * codeExtension - extension of lang 
  */
 var JavabuildRunCmd = function (dirname) {
-    return "sudo docker run -n=false -w=/usr/compiler -t -v=/home/ec2-user/onlinecompiler/temp/" + dirname +"/" + ":/usr/compiler/:rw " + "94eacf36e27a" + " timeout 5s " + 'java ' + 'Main';
+    return "sudo docker run -w=/usr/compiler -t -v=/home/ec2-user/onlinecompiler/temp/" + dirname +"/" + ":/usr/compiler/:rw " + "94eacf36e27a" + " timeout 5s " + 'java ' + 'Main';
 };
 
 exports.compileJava = function (envData , code , fn ){
@@ -58,7 +58,7 @@ exports.compileJava = function (envData , code , fn ){
                     }
                     else{
                        console.log("INFO: ".green + "compile is ok ");
-                       shell.exce(JavabuildRunCmd(dirname), function( error , stdout , stderr ){  
+                       shell.exex(JavabuildRunCmd(dirname), function( error , stdout , stderr ){  
                         if(error)
                         {
                             if(error.toString().indexOf('Error: stdout maxBuffer exceeded.') != -1)
