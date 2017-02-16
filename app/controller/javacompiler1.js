@@ -96,19 +96,25 @@ exports.compileJava = function (envData , code , fn ){
 });
 }
 
+var JavabuildCompileCmdWithInput = function (dirname) {
+    return "sudo docker run -w=/usr/compiler -t -v=/home/ec2-user/onlinecompiler/temp/" + dirname +"/" + ":/usr/compiler/:rw " + "94eacf36e27a" + " " + 'javac Main.java';
+};
 
+var JavabuildRunCmdWithInput = function (dirname) {
+    return "sudo docker run -w=/usr/compiler -t -v=/home/ec2-user/onlinecompiler/temp/" + dirname +"/" + ":/usr/compiler/:rw " + "94eacf36e27a" + " timeout 5s " + 'java ' + 'Main' + ' < ' + 'input.txt ;
+};
 
 exports.compileJavaWithInput = function (envData , code , input , fn ){
     //creating source file
     var dirname = cuid.slug();
-    path = './temp/'+dirname;
+    var path = TEST_FOLDER + dirname;
 
     fs.mkdir(path , 0777 , function(err){   
         if(err && exports.stats)
         console.log(err.toString().red);
         else
         {
-            fs.writeFile( path  + "/Main.java" , code  , function(err ){            
+            fs.writeFile( path  + "/Main.java" , code  , function(err){            
                 if(err && exports.stats)
                     console.log('ERROR: '.red + err);
                 else
@@ -120,9 +126,8 @@ exports.compileJavaWithInput = function (envData , code , input , fn ){
                             console.log('ERROR: '.red + err);
                         else
                         {
-                            if(envData.OS === "linux")
-                            var command = "cd "+path+ " && " + " javac Main.java";
-                            exec(command , function( error , stdout , stderr ){                     
+                            //var command = "cd "+path+ " && " + " javac Main.java";
+                            shell.exec(JavabuildCompileCmdWithInput(dirname) , function( error , stdout , stderr ){                     
                                 if(error)
                                 {
                                     if(exports.stats)                           
@@ -133,8 +138,9 @@ exports.compileJavaWithInput = function (envData , code , input , fn ){
                                 else
                                 {
                                     console.log("INFO: ".green + "compiled a java file");
-                                    var command = "cd "+path+" && java Main < input.txt";
-                                    exec(command , function( error , stdout , stderr ){
+                                    //var command = "cd "+path+" && java Main < input.txt";
+                                    
+                                    shell.exec(JavabuildRunCmdWithInput(dirname) , function( error , stdout , stderr ){
                                         if(error)
                                         {
                                             

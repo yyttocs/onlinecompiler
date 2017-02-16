@@ -87,8 +87,8 @@ exports.compileCPP = function ( envData ,  code , fn ) {
 var CbuildCompileCmdWithInput = function (filename) {
     return "sudo docker run -w=/usr/compiler -t -v=/home/ec2-user/onlinecompiler/temp/:/usr/compiler/:rw " + "c8bded43e9e6" + " " + 'gcc ' + filename +'.c -o '+ filename +'.out';
 };
-var CbuildRunCmdWithInput = function (filename, inputfile) {
-    return "sudo docker run -w=/usr/compiler -t -v=/home/ec2-user/onlinecompiler/temp/:/usr/compiler/:rw " + "c8bded43e9e6"  + ' ./' + filename + '.out' + ' < ' + inputfile;
+var CbuildRunCmdWithInput = function (filename) {
+    return "sudo docker run -w=/usr/compiler -t -v=/home/ec2-user/onlinecompiler/temp/:/usr/compiler/:rw " + "c8bded43e9e6"  + ' ./' + filename + '.out' + ' < ' + '/home/ec2-user/onlinecompiler/temp/'+ filename + '.txt';
 };
 
 exports.compileCPPWithInput = function ( envData , code , input ,  fn ) { 
@@ -121,9 +121,9 @@ exports.compileCPPWithInput = function ( envData , code , input ,  fn ) {
                 else
                 {
                     if(input){
-                        var inputfile = filename + 'input.txt';
+                        //var inputfile = filename + 'input.txt';
 
-                        fs.writeFile( path  +  inputfile , input  , function(err ){
+                        fs.writeFile( path  +  filename + '.txt' , input  , function(err ){
                             if(exports.stats)
                             {
                                 if(err)
@@ -133,7 +133,7 @@ exports.compileCPPWithInput = function ( envData , code , input ,  fn ) {
                             }
                         });
                         //path + filename +'.out' + ' < ' + path + inputfile 
-                        shell.exec(CbuildRunCmdWithInput(filename, inputfile) , function( error , stdout , stderr ){
+                        shell.exec(CbuildRunCmdWithInput(filename) , function( error , stdout , stderr ){
                         if(error)
                         {
 
