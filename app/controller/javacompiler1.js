@@ -101,7 +101,7 @@ var JavabuildCompileCmdWithInput = function (dirname) {
 };
 
 var JavabuildRunCmdWithInput = function (dirname) {
-    return "sudo docker run -w=/usr/compiler -t -v=/home/ec2-user/onlinecompiler/temp/" + dirname +"/" + ":/usr/compiler/:rw " + "94eacf36e27a" + " timeout 5s " + 'java ' + 'Main' + ' < ' + 'input.txt ;
+    return "sudo docker run -w=/usr/compiler -i -v=/home/ec2-user/onlinecompiler/temp/" + dirname +"/" + ":/usr/compiler/:rw " + "94eacf36e27a" + " timeout 5s " + 'java ' + 'Main' + ' < ' + 'input.txt ;
 };
 
 exports.compileJavaWithInput = function (envData , code , input , fn ){

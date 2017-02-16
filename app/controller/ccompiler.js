@@ -88,7 +88,7 @@ var CbuildCompileCmdWithInput = function (filename) {
     return "sudo docker run -w=/usr/compiler -t -v=/home/ec2-user/onlinecompiler/temp/:/usr/compiler/:rw " + "c8bded43e9e6" + " " + 'gcc ' + filename +'.c -o '+ filename +'.out';
 };
 var CbuildRunCmdWithInput = function (filename) {
-    return "sudo docker run -w=/usr/compiler -t -v=/home/ec2-user/onlinecompiler/temp/:/usr/compiler/:rw " + "c8bded43e9e6"  + ' ./' + filename + '.out' + ' < ' + '/home/ec2-user/onlinecompiler/temp/'+ filename + '.txt';
+    return "sudo docker run -w=/usr/compiler -i -v=/home/ec2-user/onlinecompiler/temp/:/usr/compiler/:rw " + "c8bded43e9e6"  + ' ./' + filename + '.out' + ' < ' + '/home/ec2-user/onlinecompiler/temp/'+ filename + '.txt';
 };
 
 exports.compileCPPWithInput = function ( envData , code , input ,  fn ) { 
