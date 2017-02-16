@@ -9,10 +9,10 @@ exports.stats = false ;
 
 var TEST_FOLDER = '/home/ec2-user/onlinecompiler/temp/';
 var CbuildCompileCmd = function (filename) {
-    return "sudo docker run -w=/usr/compiler -t -v=/home/ec2-user/onlinecompiler/temp/:/usr/compiler/:rw " + "c8bded43e9e6" + " " + 'gcc ' + filename +'.cpp -o '+ filename +'.out'  ;
+    return "sudo docker run -w=/usr/compiler -t -v=/home/ec2-user/onlinecompiler/temp/:/usr/compiler/:rw " + "c8bded43e9e6" + " " + 'gcc ' + filename +'.c -o '+ filename +'.out';
 };
 var CbuildRunCmd = function (filename) {
-    return "sudo docker run -w=/usr/compiler -t -v=/home/ec2-user/onlinecompiler/temp/:/usr/compiler/:rw " + "c8bded43e9e6" + " timeout 5s " + './' + filename + '.out';
+    return "sudo docker run -w=/usr/compiler -t -v=/home/ec2-user/onlinecompiler/temp/:/usr/compiler/:rw " + "c8bded43e9e6"  + ' ./' + filename + '.out';
 };
 exports.stats = false ;
 
@@ -24,25 +24,25 @@ exports.compileCPP = function ( envData ,  code , fn ) {
                  
 
             //create temp0 
-            fs.writeFile( path  +  filename +'.cpp' , code  , function(err ){           
+            fs.writeFile( path  +  filename +'.c' , code  , function(err ){           
                 if(exports.stats)
                 {
                     if(err)
                     console.log('ERROR: '.red + err);
                     else
-                    console.log('INFO: '.green + filename +'.cpp created'); 
+                    console.log('INFO: '.green + filename +'.c created'); 
                 }
                 else{
                     //compiling and exrcuiting source code
             //compile c code 
 
             //commmand = 'gcc ' + path + filename +'.cpp -o '+ path + filename+'.out' ;
-            shell.exec(CbuildCompileCmd , function ( error , stdout , stderr ){  
+            shell.exec(CbuildCompileCmd(filename), function ( error , stdout , stderr ){  
                 if(error)
                 {
                     if(exports.stats)
                     {
-                        console.log('INFO: '.green + filename + '.cpp contained an error while compiling');
+                        console.log('INFO: '.green + filename + '.c contained an error while compiling');
                     }
                     var out = { error : stderr};
                     fn(out);
@@ -61,7 +61,7 @@ exports.compileCPP = function ( envData ,  code , fn ) {
                             {
                                 if(exports.stats)
                                     {
-                                        console.log('INFO: '.green + filename + '.cpp contained an error while executing');
+                                        console.log('INFO: '.green + filename + '.c contained an error while executing');
                                     }
                                 var out = { error : stderr };
                                 fn(out);
@@ -71,7 +71,7 @@ exports.compileCPP = function ( envData ,  code , fn ) {
                         {
                             if(exports.stats)
                             {
-                                console.log('INFO: '.green + filename + '.cpp successfully compiled and executed !');
+                                console.log('INFO: '.green + filename + '.c successfully compiled and executed !');
                             }
                             var out = { output : stdout};
                             fn(out);
@@ -82,111 +82,38 @@ exports.compileCPP = function ( envData ,  code , fn ) {
             });
                 }
             });        
-}                                        
+}     
 
+var CbuildCompileCmdWithInput = function (filename) {
+    return "sudo docker run -w=/usr/compiler -t -v=/home/ec2-user/onlinecompiler/temp/:/usr/compiler/:rw " + "c8bded43e9e6" + " " + 'gcc ' + filename +'.c -o '+ filename +'.out';
+};
+var CbuildRunCmdWithInput = function (filename, inputfile) {
+    return "sudo docker run -w=/usr/compiler -t -v=/home/ec2-user/onlinecompiler/temp/:/usr/compiler/:rw " + "c8bded43e9e6"  + ' ./' + filename + '.out' + ' < ' + inputfile;
+};
 
 exports.compileCPPWithInput = function ( envData , code , input ,  fn ) { 
     var filename = cuid.slug();
-    path = './temp/';
+    path = TEST_FOLDER;
                  
     //create temp0 
-    fs.writeFile( path  +  filename +'.cpp' , code  , function(err ){
+    fs.writeFile( path  +  filename +'.c' , code  , function(err ){
         if(exports.stats)
         {
             if(err)
             console.log('ERROR: '.red + err);
             else
-            console.log('INFO: '.green + filename +'.cpp created');
+            console.log('INFO: '.green + filename +'.c created');
         } 
     });
 
-    if(envData.OS === 'windows' || envData.cmd ==='g++')
-        {               
-
-            //compile c code 
-            commmand = 'g++ ' + path + filename +'.cpp -o '+ path + filename+'.exe' ;
-            exec(commmand , function ( error , stdout , stderr ){  
+        //compile c code 
+            //commmand = 'gcc ' + path + filename +'.c -o '+ path + filename+'.out' ;
+            shell.exec(CbuildCompileCmdWithInput(filename) , function ( error , stdout , stderr ){  
                 if(error)
                 {
                     if(exports.stats)
                     {
-                        console.log('INFO: '.green + filename + '.cpp contained an error while compiling');
-                    }
-                    var out = { error : stderr };
-                    fn(out);
-                }
-                else
-                {
-                    if(input){
-                        var inputfile = filename + 'input.txt';
-
-                        fs.writeFile( path  +  inputfile , input  , function(err ){
-                            if(exports.stats)
-                            {
-                                if(err)
-                                    console.log('ERROR: '.red + err);
-                                else
-                                    console.log('INFO: '.green + inputfile +' (inputfile) created');
-                            }
-                        });
-                        var tempcommand = "cd temp & " + filename ;
-
-                        exec( tempcommand + '<' + inputfile , function( error , stdout , stderr ){
-                        if(error)
-                        {
-                        if(error.toString().indexOf('Error: stdout maxBuffer exceeded.') != -1)
-                            {
-                                var out = { error : 'Error: stdout maxBuffer exceeded. You might have initialized an infinite loop.'};
-                                fn(out);
-                            }
-                        else
-                            {
-                                if(exports.stats)
-                                    {
-                                        console.log('INFO: '.green + filename + '.cpp contained an error while executing');
-                                    }
-                                var out = { error : stderr};
-                                fn(out);
-                            }                                                                               
-                        }
-                        else
-                        {
-                            if(exports.stats)
-                            {
-                                console.log('INFO: '.green + filename + '.cpp successfully compiled and executed !');
-                            }
-                            var out = { output : stdout};
-                            fn(out);
-                        }
-                        });
-
-                    }
-                    else //input not provided 
-                    {
-                        if(exports.stats)
-                        {
-                            console.log('INFO: '.green + 'Input mission for '+filename +'.cpp');
-                        }
-                        var out = { error : 'Input Missing' };
-                        fn(out);
-                    }
-                    
-                }
-            
-
-            });
-                                        
-        }
-    else            
-        {
-                        //compile c code 
-            commmand = 'gcc ' + path + filename +'.cpp -o '+ path + filename+'.out' ;
-            exec(commmand , function ( error , stdout , stderr ){  
-                if(error)
-                {
-                    if(exports.stats)
-                    {
-                        console.log('INFO: '.green + filename + '.cpp contained an error while compiling');
+                        console.log('INFO: '.green + filename + '.c contained an error while compiling');
                     }
                     var out = { error : stderr};
                     fn(out);
@@ -205,8 +132,8 @@ exports.compileCPPWithInput = function ( envData , code , input ,  fn ) {
                                     console.log('INFO: '.green + inputfile +' (inputfile) created');
                             }
                         });
-
-                        exec( path + filename +'.out' + ' < ' + path + inputfile , function( error , stdout , stderr ){
+                        //path + filename +'.out' + ' < ' + path + inputfile 
+                        shell.exec(CbuildRunCmdWithInput(filename, inputfile) , function( error , stdout , stderr ){
                         if(error)
                         {
 
@@ -219,7 +146,7 @@ exports.compileCPPWithInput = function ( envData , code , input ,  fn ) {
                             {
                                 if(exports.stats)
                                 {
-                                    console.log('INFO: '.green + filename + '.cpp contained an error while executing');
+                                    console.log('INFO: '.green + filename + '.c contained an error while executing');
                                 }
                                 var out =  { output : stderr};
                                 fn(out);
@@ -229,7 +156,7 @@ exports.compileCPPWithInput = function ( envData , code , input ,  fn ) {
                         {
                             if(exports.stats)
                             {
-                                console.log('INFO: '.green + filename + '.cpp successfully compiled and executed !');
+                                console.log('INFO: '.green + filename + '.c successfully compiled and executed !');
                             }
                             var out = { output : stdout};
                             fn(out);
@@ -241,7 +168,7 @@ exports.compileCPPWithInput = function ( envData , code , input ,  fn ) {
                     {
                         if(exports.stats)
                         {
-                            console.log('INFO: '.green + 'Input mission for '+filename +'.cpp');
+                            console.log('INFO: '.green + 'Input mission for '+filename +'.c');
                         }
                         var out = { error : 'Input Missing' };
                         fn(out);
@@ -252,6 +179,5 @@ exports.compileCPPWithInput = function ( envData , code , input ,  fn ) {
     
             });
 
-
-        }                               
+                          
 } //end of compileCPPWithInput
